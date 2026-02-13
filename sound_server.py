@@ -10,8 +10,9 @@ from pydantic import BaseModel
 import subprocess
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Dict, Any
 import logging
+import yaml
 
 # Configure logging
 logging.basicConfig(
@@ -31,9 +32,94 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuration
-SOUNDS_DIR = Path.home() / "scripts/sounds/notification_sounds"
+# Configuration - will be set by configure_app()
+SOUNDS_DIR: Optional[Path] = None
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".aiff", ".m4a"}
+HOST = "0.0.0.0"
+PORT = 9091
+
+
+def load_config_file(config_path: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Load configuration from a YAML file.
+    Looks in the following locations (in order):
+    1. Specified config_path
+    2. ~/.sound-server.yaml
+    3. ~/.config/sound-server/config.yaml
+    4. ./sound-server.yaml
+    """
+    config = {}
+
+    search_paths = []
+    if config_path:
+        search_paths.append(Path(config_path))
+    else:
+        search_paths.extend([
+            Path.home() / ".sound-server.yaml",
+            Path.home() / ".config/sound-server/config.yaml",
+            Path.cwd() / "sound-server.yaml"
+        ])
+
+    for path in search_paths:
+        if path.exists():
+            try:
+                with open(path, 'r') as f:
+                    config = yaml.safe_load(f) or {}
+                logger.info(f"Loaded configuration from {path}")
+                break
+            except Exception as e:
+                logger.warning(f"Error loading config from {path}: {e}")
+
+    return config
+
+
+def configure_app(sounds_dir: Optional[str] = None, host: Optional[str] = None, port: Optional[int] = None,
+                  config_file: Optional[str] = None):
+    """
+    Configure the application with runtime settings.
+    Priority: CLI args > Environment variables > Config file > Default values
+    """
+    global SOUNDS_DIR, HOST, PORT
+
+    # Load config file first
+    config = load_config_file(config_file)
+
+    # Configure sounds directory
+    if sounds_dir:
+        SOUNDS_DIR = Path(sounds_dir).expanduser().resolve()
+    elif env_sounds := os.getenv("SOUND_SERVER_SOUNDS_DIR"):
+        SOUNDS_DIR = Path(env_sounds).expanduser().resolve()
+    elif "sounds_dir" in config:
+        SOUNDS_DIR = Path(config["sounds_dir"]).expanduser().resolve()
+    else:
+        # Default to ~/sounds
+        SOUNDS_DIR = Path.home() / "sounds"
+
+    # Configure host
+    if host:
+        HOST = host
+    elif env_host := os.getenv("SOUND_SERVER_HOST"):
+        HOST = env_host
+    elif "host" in config:
+        HOST = config["host"]
+
+    # Configure port
+    if port:
+        PORT = port
+    elif env_port := os.getenv("SOUND_SERVER_PORT"):
+        try:
+            PORT = int(env_port)
+        except ValueError:
+            logger.warning(f"Invalid SOUND_SERVER_PORT value: {env_port}, using default {PORT}")
+    elif "port" in config:
+        try:
+            PORT = int(config["port"])
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid port in config file: {config['port']}, using default {PORT}")
+
+    logger.info(f"Configured sounds directory: {SOUNDS_DIR}")
+    logger.info(f"Configured host: {HOST}")
+    logger.info(f"Configured port: {PORT}")
 
 # Request/Response models
 class PlayRequest(BaseModel):
@@ -182,13 +268,13 @@ def run_server():
     """Run the sound server"""
     import uvicorn
 
-    logger.info(f"Starting Sound Server on port 9091")
+    logger.info(f"Starting Sound Server on {HOST}:{PORT}")
     logger.info(f"Sounds directory: {SOUNDS_DIR}")
 
     uvicorn.run(
         app,
-        host="0.0.0.0",  # Listen on all interfaces (needed for Docker access)
-        port=9091,
+        host=HOST,
+        port=PORT,
         log_level="info"
     )
 
@@ -208,12 +294,43 @@ Examples:
   # Run server normally
   sound-server
 
+  # Run with custom sounds directory
+  sound-server --sounds-dir ~/my-sounds
+
+  # Run with custom host and port
+  sound-server --host 127.0.0.1 --port 8080
+
   # Run with a command (starts server, runs command, stops server)
   sound-server -- yolobox claude --gh-token
 
   # Check if server is running
   sound-server --check
+
+Environment Variables:
+  SOUND_SERVER_SOUNDS_DIR    Directory containing sound files (default: ~/sounds)
+  SOUND_SERVER_HOST          Host to bind to (default: 0.0.0.0)
+  SOUND_SERVER_PORT          Port to listen on (default: 9091)
         """
+    )
+    parser.add_argument(
+        '--sounds-dir',
+        type=str,
+        help='Directory containing sound files (default: ~/sounds or SOUND_SERVER_SOUNDS_DIR)'
+    )
+    parser.add_argument(
+        '--host',
+        type=str,
+        help='Host to bind to (default: 0.0.0.0 or SOUND_SERVER_HOST)'
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        help='Port to listen on (default: 9091 or SOUND_SERVER_PORT)'
+    )
+    parser.add_argument(
+        '--config',
+        type=str,
+        help='Path to YAML configuration file (default: searches ~/.sound-server.yaml, ~/.config/sound-server/config.yaml, ./sound-server.yaml)'
     )
     parser.add_argument(
         '--check',
@@ -228,9 +345,17 @@ Examples:
 
     args = parser.parse_args()
 
+    # Configure the application
+    configure_app(
+        sounds_dir=args.sounds_dir,
+        host=args.host,
+        port=args.port,
+        config_file=args.config
+    )
+
     # Check mode
     if args.check:
-        if is_server_running():
+        if is_server_running(port=PORT):
             print("✅ Sound server is running")
             sys.exit(0)
         else:
@@ -240,7 +365,7 @@ Examples:
     # If a command is provided, run in daemon mode
     if args.command:
         # Check if server is already running
-        server_was_running = is_server_running()
+        server_was_running = is_server_running(port=PORT)
         server_process = None
 
         if server_was_running:
@@ -248,10 +373,20 @@ Examples:
         else:
             print("🎵 Starting sound-server in background...")
 
+            # Build command to start server with same configuration
+            start_cmd = [sys.executable, "-m", "sound_server"]
+            if args.config:
+                start_cmd.extend(["--config", args.config])
+            if args.sounds_dir:
+                start_cmd.extend(["--sounds-dir", args.sounds_dir])
+            if args.host:
+                start_cmd.extend(["--host", args.host])
+            if args.port:
+                start_cmd.extend(["--port", str(args.port)])
+
             # Start server in background
             server_process = subprocess.Popen(
-                [sys.executable, "-c",
-                 "from sound_server import run_server; run_server()"],
+                start_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True
@@ -260,7 +395,7 @@ Examples:
             # Wait for server to be ready
             for i in range(30):  # Try for 3 seconds
                 time.sleep(0.1)
-                if is_server_running():
+                if is_server_running(port=PORT):
                     print(f"✅ Sound server started (PID: {server_process.pid})")
                     break
             else:
@@ -299,8 +434,8 @@ Examples:
 
     # Normal mode: run server in foreground
     else:
-        if is_server_running():
-            print("⚠️  Warning: Server may already be running on port 9091")
+        if is_server_running(port=PORT):
+            print(f"⚠️  Warning: Server may already be running on port {PORT}")
             print("   Use --check to verify, or stop the existing server first")
             print()
 

@@ -1,0 +1,26 @@
+# Example configuration file for sound-server
+#
+# You can place this file in one of the following locations:
+# - ~/.sound-server.yaml
+# - ~/.config/sound-server/config.yaml
+# - ./sound-server.yaml (in your current directory)
+#
+# Or specify a custom location with: sound-server --config /path/to/config.yaml
+#
+# Configuration priority:
+# 1. Command-line arguments (highest priority)
+# 2. Environment variables
+# 3. Configuration file
+# 4. Default values (lowest priority)
+
+# Directory containing your sound files
+# Supports ~ for home directory expansion
+sounds_dir: ~/sounds
+
+# Host to bind the server to
+# Use 0.0.0.0 to listen on all network interfaces (needed for Docker)
+# Use 127.0.0.1 to only listen on localhost
+host: 0.0.0.0
+
+# Port number for the HTTP server
+port: 9091

@@ -1,0 +1,111 @@
+{
+  "// Note": "This is the original use case that inspired Sound Server!",
+  "// Purpose": "Add audio feedback to Claude Code actions",
+  "// Location": "Add to ~/.claude/settings.json under the 'hooks' key",
+
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Play sound when Claude requests permission",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"permission-request.mp3\", \"volume\":0.7}'"
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Play sound when Claude asks a question",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"question.mp3\", \"volume\":0.6}'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Subtle tick when running commands",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"tick.mp3\", \"volume\":0.3}'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Sound when editing files",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"edit.mp3\", \"volume\":0.4}'"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Different sound when command completes",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"command-complete.mp3\", \"volume\":0.3}'"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Play sound when Claude stops/completes",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"task-complete.mp3\", \"volume\":0.8}'"
+          }
+        ]
+      }
+    ],
+
+    "Error": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "comment": "Alert sound on errors",
+            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"error.mp3\", \"volume\":0.9}'"
+          }
+        ]
+      }
+    ]
+  },
+
+  "// Tips": [
+    "Use host.docker.internal instead of localhost when Claude Code runs in Docker",
+    "Adjust volume levels (0.0-1.0) to avoid overwhelming feedback",
+    "Use subtle sounds (low volume) for frequent events like Bash commands",
+    "Use prominent sounds (high volume) for important events like errors or completions",
+    "Test your sounds first: curl http://localhost:9091/sounds",
+    "Start sound-server before launching Claude Code for best experience"
+  ],
+
+  "// Sound Recommendations": {
+    "permission-request": "Distinctive sound to grab attention",
+    "question": "Friendly, inquisitive sound",
+    "tick": "Very subtle click or tap (low volume)",
+    "edit": "Subtle keyboard tap or pen scratch",
+    "command-complete": "Soft completion chime",
+    "task-complete": "Satisfying completion sound",
+    "error": "Alert tone that stands out"
+  }
+}

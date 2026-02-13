@@ -1,17 +1,39 @@
 [project]
 name = "sound-server"
-version = "1.1.0"
-description = "HTTP server for playing sounds on macOS from Docker-based Claude Code"
+version = "2.0.0"
+description = "Flexible HTTP server for playing audio files on your system"
 authors = [
     { name = "Dean Putney" }
 ]
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
+keywords = ["sound", "audio", "http", "server", "macos", "docker"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+    "Topic :: System :: Networking",
+]
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
+    "pyyaml>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/deanputney/sound-server"
+Repository = "https://github.com/deanputney/sound-server"
+Issues = "https://github.com/deanputney/sound-server/issues"
 
 [project.scripts]
 sound-server = "sound_server:main"

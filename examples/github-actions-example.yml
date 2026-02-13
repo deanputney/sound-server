@@ -1,0 +1,103 @@
+# Example: GitHub Actions Integration with Sound Server
+#
+# This workflow demonstrates how to add sound notifications to CI/CD pipelines
+# when using self-hosted macOS runners.
+#
+# Requirements:
+# - Self-hosted macOS runner with sound-server installed
+# - Sound server running on the runner machine
+
+name: CI with Sound Notifications
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: self-hosted  # Use self-hosted macOS runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Notify Build Start
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"build-start.mp3", "volume":0.7}' || true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        id: tests
+        run: |
+          pytest tests/ --junitxml=test-results.xml
+
+      - name: Notify Test Success
+        if: success()
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"tests-passed.mp3"}' || true
+
+      - name: Notify Test Failure
+        if: failure()
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"tests-failed.mp3"}' || true
+
+  deploy:
+    runs-on: self-hosted
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Notify Deploy Start
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"deploy-start.mp3"}' || true
+
+      - name: Deploy to production
+        run: |
+          ./scripts/deploy.sh
+
+      - name: Notify Deploy Complete
+        if: success()
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"deploy-success.mp3", "volume":1.0}' || true
+
+      - name: Notify Deploy Failure
+        if: failure()
+        run: |
+          curl -s -X POST http://localhost:9091/play \
+            -H 'Content-Type: application/json' \
+            -d '{"sound":"deploy-failed.mp3", "volume":1.0}' || true
+          # Also send alert to team
+          echo "💥 Deployment failed! Check the logs."
+
+# Alternative: Using a reusable action
+# You could create a custom action to simplify sound notifications:
+#
+# - name: Play Sound
+#   uses: ./.github/actions/play-sound
+#   with:
+#     sound: 'notification.mp3'
+#     volume: 0.8
