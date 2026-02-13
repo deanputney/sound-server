@@ -1,10 +1,10 @@
 class SoundServer < Formula
   include Language::Python::Virtualenv
 
-  desc "HTTP server for playing sounds on macOS from Docker-based Claude Code"
+  desc "HTTP server for playing audio notifications on macOS"
   homepage "https://github.com/deanputney/sound-server"
-  url "https://files.pythonhosted.org/packages/source/s/sound-server/sound-server-1.1.0.tar.gz"
-  sha256 "PLACEHOLDER_WILL_BE_GENERATED_WHEN_UPLOADED_TO_PYPI"
+  url "https://files.pythonhosted.org/packages/source/s/sound-server/sound-server-2.0.0.tar.gz"
+  sha256 "PLACEHOLDER_SHA256"
   license "MIT"
 
   depends_on "python@3.12"
