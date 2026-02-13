@@ -154,13 +154,37 @@ Notify when builds complete (when running on self-hosted macOS runners):
 
 ### Temporary Server with Command
 
-Start the server, run a command, then automatically stop the server:
+Start the server, run a command, then automatically stop the server when the command completes:
 
 ```bash
-sound-server -- ./run-tests.sh
+sound-server -- yolobox claude --gh-token
 ```
 
-This is perfect for one-off tasks where you want sound notifications without leaving the server running.
+This pattern is perfect for one-off tasks where you want sound notifications during command execution without leaving the server running permanently.
+
+**How it works:**
+1. Checks if sound-server is already running
+2. If not, starts it in the background
+3. Runs your command with the server available
+4. Automatically stops the server when your command completes (only if it started the server)
+
+**Additional examples:**
+
+```bash
+# Run tests with sound notifications
+sound-server -- ./run-tests.sh
+
+# Start a development container with sound support
+sound-server -- docker compose up
+
+# Run a long build process
+sound-server -- npm run build
+
+# Execute any command that might need to play sounds
+sound-server -- python my_script.py
+```
+
+The server will trap and clean up properly even if your command is interrupted (Ctrl+C) or fails.
 
 ## Configuration
 
