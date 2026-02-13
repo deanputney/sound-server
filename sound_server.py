@@ -36,7 +36,7 @@ app.add_middleware(
 SOUNDS_DIR: Optional[Path] = None
 ALLOWED_EXTENSIONS = {".mp3", ".wav", ".aiff", ".m4a"}
 HOST = "0.0.0.0"
-PORT = 9091
+PORT = 48291
 
 
 def load_config_file(config_path: Optional[str] = None) -> Dict[str, Any]:
@@ -251,7 +251,7 @@ async def play_sound(request: PlayRequest):
         )
 
 
-def is_server_running(port=9091, host="localhost"):
+def is_server_running(port=48291, host="localhost"):
     """Check if the sound server is already running"""
     import socket
     try:
@@ -267,16 +267,40 @@ def is_server_running(port=9091, host="localhost"):
 def run_server():
     """Run the sound server"""
     import uvicorn
+    import random
+    import socket
 
-    logger.info(f"Starting Sound Server on {HOST}:{PORT}")
-    logger.info(f"Sounds directory: {SOUNDS_DIR}")
+    port = PORT
+    max_retries = 10
 
-    uvicorn.run(
-        app,
-        host=HOST,
-        port=PORT,
-        log_level="info"
-    )
+    for attempt in range(max_retries):
+        # Check if port is available
+        if not is_server_running(port=port, host="localhost"):
+            logger.info(f"Starting Sound Server on {HOST}:{port}")
+            logger.info(f"Sounds directory: {SOUNDS_DIR}")
+
+            try:
+                uvicorn.run(
+                    app,
+                    host=HOST,
+                    port=port,
+                    log_level="info"
+                )
+                return
+            except OSError as e:
+                if "Address already in use" in str(e):
+                    logger.warning(f"Port {port} is in use")
+                else:
+                    raise
+        else:
+            logger.warning(f"Port {port} is already in use")
+
+        # Pick a random port in the dynamic/private range (49152-65535)
+        port = random.randint(49152, 65535)
+        logger.info(f"Retrying with random port {port}...")
+
+    logger.error(f"Failed to find available port after {max_retries} attempts")
+    raise RuntimeError("Could not find available port")
 
 
 def main():
@@ -309,7 +333,7 @@ Examples:
 Environment Variables:
   SOUND_SERVER_SOUNDS_DIR    Directory containing sound files (default: ~/sounds)
   SOUND_SERVER_HOST          Host to bind to (default: 0.0.0.0)
-  SOUND_SERVER_PORT          Port to listen on (default: 9091)
+  SOUND_SERVER_PORT          Port to listen on (default: 48291)
         """
     )
     parser.add_argument(
@@ -325,7 +349,7 @@ Environment Variables:
     parser.add_argument(
         '--port',
         type=int,
-        help='Port to listen on (default: 9091 or SOUND_SERVER_PORT)'
+        help='Port to listen on (default: 48291 or SOUND_SERVER_PORT)'
     )
     parser.add_argument(
         '--config',

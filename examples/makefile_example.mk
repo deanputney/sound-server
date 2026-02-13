@@ -10,7 +10,7 @@
 
 .PHONY: help build test clean deploy all
 
-SOUND_SERVER := http://localhost:9091
+SOUND_SERVER := http://localhost:48291
 
 # Helper function to play sounds
 define play_sound

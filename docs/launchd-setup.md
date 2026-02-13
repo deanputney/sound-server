@@ -202,7 +202,7 @@ cat ~/Library/Logs/sound-server.err.log
 
 **Common issues:**
 - Path to `sound-server` is incorrect in the plist
-- Port 9091 is already in use
+- Port 48291 is already in use
 - Permission issues
 
 **Verify the command works manually:**
@@ -214,8 +214,8 @@ sound-server
 ### Port already in use
 
 ```bash
-# Find what's using port 9091
-lsof -i :9091
+# Find what's using port 48291
+lsof -i :48291
 
 # If it's another sound-server instance:
 kill <PID>

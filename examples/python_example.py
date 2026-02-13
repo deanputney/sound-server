@@ -22,7 +22,7 @@ class SoundNotifier:
         notifier.play('alert.mp3', volume=0.7)
     """
 
-    def __init__(self, server_url: str = "http://localhost:9091", silent_on_error: bool = True):
+    def __init__(self, server_url: str = "http://localhost:48291", silent_on_error: bool = True):
         """
         Initialize the sound notifier.
 
@@ -210,7 +210,7 @@ def example_docker():
     print("-" * 50)
 
     # When running inside Docker, use host.docker.internal
-    notifier = SoundNotifier(server_url="http://host.docker.internal:9091")
+    notifier = SoundNotifier(server_url="http://host.docker.internal:48291")
 
     if notifier.is_available():
         print("✅ Sound server reachable from Docker!")

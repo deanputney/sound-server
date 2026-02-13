@@ -163,3 +163,39 @@ echo ""
 echo "To test installation locally:"
 echo "  uv tool install dist/sound_server-*.tar.gz"
 '''
+
+[tasks.install]
+description = "Install/update sound-server locally from current code"
+run = '''
+#!/bin/bash
+set -e
+
+echo "Installing sound-server from current directory..."
+uv tool install --force .
+
+echo ""
+echo "✓ sound-server updated successfully!"
+echo ""
+echo "Test it with: sound-server --check"
+'''
+
+[tasks.dev-install]
+description = "Build and install from wheel (alternative method)"
+run = '''
+#!/bin/bash
+set -e
+
+echo "Building package..."
+uv build
+
+echo ""
+echo "Installing from wheel..."
+WHEEL=$(ls -t dist/*.whl | head -1)
+uv tool install --force "$WHEEL"
+
+echo ""
+echo "✓ sound-server updated successfully!"
+echo ""
+echo "Installed from: $WHEEL"
+echo "Test it with: sound-server --check"
+'''

@@ -21,7 +21,7 @@ To verify your Sound Server is working with any example:
 sound-server
 
 # In another terminal, test it:
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"notification.mp3"}'
 ```
@@ -29,9 +29,9 @@ curl -X POST http://localhost:9091/play \
 ## Requirements
 
 All examples assume:
-- Sound Server is running on `http://localhost:9091`
+- Sound Server is running on `http://localhost:48291`
 - You have sound files in `~/scripts/sounds/notification_sounds/` (or your configured directory)
-- For Docker examples, use `http://host.docker.internal:9091` instead
+- For Docker examples, use `http://host.docker.internal:48291` instead
 
 ## Getting Started
 

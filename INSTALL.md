@@ -25,7 +25,7 @@ Once installed, simply run:
 sound-server
 ```
 
-The server will start on `http://localhost:9091`
+The server will start on `http://localhost:48291`
 
 ## Updating
 
@@ -59,13 +59,13 @@ source ~/.zshrc  # or source ~/.bashrc
 
 ### Port already in use
 
-If port 9091 is already in use, you'll need to either:
+If port 48291 is already in use, you'll need to either:
 1. Stop the process using that port
 2. Modify `sound_server.py` to use a different port
 
-Find what's using port 9091:
+Find what's using port 48291:
 ```bash
-lsof -i :9091
+lsof -i :48291
 ```
 
 ## Testing
@@ -74,13 +74,13 @@ After starting the server, test it:
 
 ```bash
 # Health check
-curl http://localhost:9091/health
+curl http://localhost:48291/health
 
 # List available sounds
-curl http://localhost:9091/sounds
+curl http://localhost:48291/sounds
 
 # Play a sound
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3"}'
 ```

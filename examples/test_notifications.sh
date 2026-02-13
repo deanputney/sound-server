@@ -7,7 +7,7 @@
 
 set -e
 
-SOUND_SERVER="http://localhost:9091"
+SOUND_SERVER="http://localhost:48291"
 
 # Colors for output
 RED='\033[0;31m'

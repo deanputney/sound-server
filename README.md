@@ -43,7 +43,7 @@ Simply run:
 sound-server
 ```
 
-The server starts on `http://localhost:9091` and looks for sound files in `~/scripts/sounds/notification_sounds/` by default.
+The server starts on `http://localhost:48291` and looks for sound files in `~/scripts/sounds/notification_sounds/` by default.
 
 To check if the server is running:
 
@@ -56,7 +56,7 @@ sound-server --check
 ### Play a Sound
 
 ```bash
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"notification.mp3"}'
 ```
@@ -64,7 +64,7 @@ curl -X POST http://localhost:9091/play \
 ### Play with Volume Control
 
 ```bash
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"alert.mp3", "volume":0.5}'
 ```
@@ -72,13 +72,13 @@ curl -X POST http://localhost:9091/play \
 ### List Available Sounds
 
 ```bash
-curl http://localhost:9091/sounds
+curl http://localhost:48291/sounds
 ```
 
 ### Check Server Health
 
 ```bash
-curl http://localhost:9091/health
+curl http://localhost:48291/health
 ```
 
 ## Use Cases
@@ -88,7 +88,7 @@ curl http://localhost:9091/health
 Play sounds on the host from inside a Docker container:
 
 ```bash
-curl -X POST http://host.docker.internal:9091/play \
+curl -X POST http://host.docker.internal:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"success.mp3"}'
 ```
@@ -102,18 +102,18 @@ Add audio feedback to your automation scripts:
 # deploy.sh
 
 echo "Starting deployment..."
-curl -s -X POST http://localhost:9091/play \
+curl -s -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"start.mp3"}'
 
 # ... deployment steps ...
 
 if [ $? -eq 0 ]; then
-  curl -s -X POST http://localhost:9091/play \
+  curl -s -X POST http://localhost:48291/play \
     -H 'Content-Type: application/json' \
     -d '{"sound":"success.mp3"}'
 else
-  curl -s -X POST http://localhost:9091/play \
+  curl -s -X POST http://localhost:48291/play \
     -H 'Content-Type: application/json' \
     -d '{"sound":"error.mp3"}'
 fi
@@ -128,7 +128,7 @@ def play_sound(sound_name, volume=1.0):
     """Play a sound notification"""
     try:
         response = requests.post(
-            'http://localhost:9091/play',
+            'http://localhost:48291/play',
             json={'sound': sound_name, 'volume': volume}
         )
         return response.json()
@@ -147,7 +147,7 @@ Notify when builds complete (when running on self-hosted macOS runners):
 - name: Notify Build Success
   if: success()
   run: |
-    curl -X POST http://localhost:9091/play \
+    curl -X POST http://localhost:48291/play \
       -H 'Content-Type: application/json' \
       -d '{"sound":"build-success.mp3"}'
 ```
@@ -205,7 +205,7 @@ SOUNDS_DIR = Path.home() / "your/custom/sounds/directory"
 
 ### Port Configuration
 
-The server runs on port 9091 by default. To change this, modify the `run_server()` function in `sound_server.py`.
+The server runs on port 48291 by default. To change this, modify the `run_server()` function in `sound_server.py`.
 
 ## API Reference
 
@@ -264,12 +264,12 @@ See [DAEMON_SETUP.md](DAEMON_SETUP.md) for instructions on running the server as
 ## Troubleshooting
 
 **Server won't start:**
-- Check if port 9091 is already in use: `lsof -i :9091`
+- Check if port 48291 is already in use: `lsof -i :48291`
 - Verify Python 3.8+ is installed: `python3 --version`
 - Try running with `sound-server --check` first
 
 **Sound won't play:**
-- List available sounds: `curl http://localhost:9091/sounds`
+- List available sounds: `curl http://localhost:48291/sounds`
 - Verify the sound file exists in your sounds directory
 - Test playback directly: `afplay ~/scripts/sounds/notification_sounds/test.mp3`
 - Check server logs for error messages

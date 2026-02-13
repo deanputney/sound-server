@@ -17,7 +17,7 @@ The setup includes:
 │                                     │
 │  ┌──────────────────┐              │
 │  │  Sound Server    │              │
-│  │  :9091           │              │
+│  │  :48291           │              │
 │  └────────┬─────────┘              │
 │           │                         │
 │  ┌────────┴─────────────────────┐  │
@@ -31,7 +31,7 @@ The setup includes:
 └─────────────────────────────────────┘
 ```
 
-Containers use `host.docker.internal:9091` to reach the Sound Server on the host.
+Containers use `host.docker.internal:48291` to reach the Sound Server on the host.
 
 ## Prerequisites
 
@@ -88,7 +88,7 @@ Containers use an environment variable to find the Sound Server:
 
 ```yaml
 environment:
-  - SOUND_SERVER_URL=http://host.docker.internal:9091
+  - SOUND_SERVER_URL=http://host.docker.internal:48291
 ```
 
 ### Application Code
@@ -96,7 +96,7 @@ environment:
 The Python applications use this URL to send requests:
 
 ```python
-SOUND_SERVER = os.getenv('SOUND_SERVER_URL', 'http://host.docker.internal:9091')
+SOUND_SERVER = os.getenv('SOUND_SERVER_URL', 'http://host.docker.internal:48291')
 ```
 
 ## Customization
@@ -110,7 +110,7 @@ services:
   my-service:
     image: my-image
     environment:
-      - SOUND_SERVER_URL=http://host.docker.internal:9091
+      - SOUND_SERVER_URL=http://host.docker.internal:48291
     extra_hosts:
       - "host.docker.internal:host-gateway"
 ```
@@ -124,7 +124,7 @@ services:
   your-existing-service:
     # ... existing config ...
     environment:
-      - SOUND_SERVER_URL=http://host.docker.internal:9091
+      - SOUND_SERVER_URL=http://host.docker.internal:48291
     extra_hosts:
       - "host.docker.internal:host-gateway"
 ```
@@ -134,15 +134,15 @@ Then use the Sound Server client code from the examples.
 ## Troubleshooting
 
 **Containers can't reach Sound Server:**
-- Verify Sound Server is running: `curl http://localhost:9091/health`
+- Verify Sound Server is running: `curl http://localhost:48291/health`
 - Check firewall settings on the host
 - Ensure `extra_hosts` is configured in docker-compose.yml
-- Try accessing from inside the container: `docker exec -it sound-client-app curl http://host.docker.internal:9091/health`
+- Try accessing from inside the container: `docker exec -it sound-client-app curl http://host.docker.internal:48291/health`
 
 **Sounds don't play:**
 - Check that sound files exist on the host
 - Verify Sound Server logs for errors
-- Test with curl from the host: `curl -X POST http://localhost:9091/play -H 'Content-Type: application/json' -d '{"sound":"test.mp3"}'`
+- Test with curl from the host: `curl -X POST http://localhost:48291/play -H 'Content-Type: application/json' -d '{"sound":"test.mp3"}'`
 
 **Docker Compose fails to start:**
 - Ensure Docker is running

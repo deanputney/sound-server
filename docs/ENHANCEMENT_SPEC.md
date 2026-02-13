@@ -6,7 +6,7 @@
 Sound Server is an HTTP server that plays audio files on macOS via `afplay` command. It was originally designed to enable Claude Code running in Docker to play sounds on the host machine, but it's useful for any Docker-based or remote workflow that needs audio notifications.
 
 ### Current Features
-- ✅ FastAPI HTTP server on port 9091
+- ✅ FastAPI HTTP server on port 48291
 - ✅ Three endpoints: POST /play, GET /health, GET /sounds
 - ✅ Volume control (0.0 to 1.0)
 - ✅ Security: directory traversal prevention
@@ -20,7 +20,7 @@ Sound Server is an HTTP server that plays audio files on macOS via `afplay` comm
 2. **Claude Code-focused docs**: README assumes Claude Code use case
 3. **Installation**: Only uv tool install, no Homebrew
 4. **Configuration**: Must edit source code to change settings
-5. **Port**: Hardcoded to 9091
+5. **Port**: Hardcoded to 48291
 6. **No config file**: Can't persist settings
 
 ## Target State
@@ -56,10 +56,10 @@ Allow users to specify their sounds directory via multiple methods (precedence o
 **Priority: Medium**
 
 Allow port configuration via:
-1. CLI argument: `--port 9091`
+1. CLI argument: `--port 48291`
 2. Environment variable: `SOUND_SERVER_PORT`
-3. Config file: `port: 9091`
-4. Default: 9091
+3. Config file: `port: 48291`
+4. Default: 48291
 
 #### 3. Configuration File Support
 **Priority: High**
@@ -73,7 +73,7 @@ Create `~/.sound-server/config.yaml` support:
 sounds_dir: ~/Music/Sounds
 
 # Server port
-port: 9091
+port: 48291
 
 # Allowed file extensions
 allowed_extensions:

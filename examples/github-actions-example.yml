@@ -25,7 +25,7 @@ jobs:
 
       - name: Notify Build Start
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"build-start.mp3", "volume":0.7}' || true
 
@@ -47,14 +47,14 @@ jobs:
       - name: Notify Test Success
         if: success()
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"tests-passed.mp3"}' || true
 
       - name: Notify Test Failure
         if: failure()
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"tests-failed.mp3"}' || true
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: Notify Deploy Start
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"deploy-start.mp3"}' || true
 
@@ -80,14 +80,14 @@ jobs:
       - name: Notify Deploy Complete
         if: success()
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"deploy-success.mp3", "volume":1.0}' || true
 
       - name: Notify Deploy Failure
         if: failure()
         run: |
-          curl -s -X POST http://localhost:9091/play \
+          curl -s -X POST http://localhost:48291/play \
             -H 'Content-Type: application/json' \
             -d '{"sound":"deploy-failed.mp3", "volume":1.0}' || true
           # Also send alert to team

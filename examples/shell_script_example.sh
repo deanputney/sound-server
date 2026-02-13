@@ -7,7 +7,7 @@
 
 set -e  # Exit on error
 
-SOUND_SERVER="http://localhost:9091"
+SOUND_SERVER="http://localhost:48291"
 
 # Function to play a sound
 play_sound() {

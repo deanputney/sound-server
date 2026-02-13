@@ -9,7 +9,7 @@ import os
 import time
 import random
 
-SOUND_SERVER = os.getenv('SOUND_SERVER_URL', 'http://host.docker.internal:9091')
+SOUND_SERVER = os.getenv('SOUND_SERVER_URL', 'http://host.docker.internal:48291')
 
 def play_sound(sound, volume=1.0):
     """Play a sound on the host machine"""
