@@ -43,7 +43,7 @@ mise run release:dry-run
 
 ## Complete Release Workflow
 
-### 1. Prepare the release
+### 1. Create the release
 
 ```bash
 # Preview changes
@@ -60,32 +60,15 @@ This creates:
 - ✅ Git tag (e.g., `v2.1.0`)
 - ✅ GitHub release with changelog
 
-### 2. Publish to PyPI
+### 2. Homebrew Tap Auto-Update
 
-```bash
-mise run publish
-```
-
-This:
-- ✅ Builds the package with `uv build`
-- ✅ Publishes to PyPI with `uv publish`
-
-**OR** manually:
-
-```bash
-uv build
-uv publish
-```
-
-### 3. Homebrew Tap Auto-Update
-
-After publishing to PyPI:
+After creating the GitHub release:
 - ✅ GitHub Action automatically triggers
-- ✅ Downloads tarball and calculates SHA256
+- ✅ Downloads GitHub release tarball and calculates SHA256
 - ✅ Updates formula in `deanputney/homebrew-tap`
 - ✅ Users can immediately: `brew upgrade deanputney/tap/sound-server`
 
-No manual intervention needed!
+**That's it!** No PyPI publishing needed. Everything happens automatically.
 
 ## Manual Steps (if needed)
 
@@ -94,7 +77,7 @@ If the GitHub Action fails or you need to manually update the tap:
 1. Get the SHA256:
    ```bash
    VERSION=2.1.0
-   curl -Ls "https://files.pythonhosted.org/packages/source/s/sound-server/sound-server-${VERSION}.tar.gz" | shasum -a 256
+   curl -Ls "https://github.com/deanputney/sound-server/archive/refs/tags/v${VERSION}.tar.gz" | shasum -a 256
    ```
 
 2. Update `deanputney/homebrew-tap`:
@@ -110,15 +93,6 @@ If the GitHub Action fails or you need to manually update the tap:
    ```
 
 ## Troubleshooting
-
-### PyPI upload fails
-
-Check your PyPI credentials:
-```bash
-# Ensure ~/.pypirc is configured or use environment variables
-export TWINE_USERNAME=__token__
-export TWINE_PASSWORD=pypi-...
-```
 
 ### GitHub Action doesn't trigger
 
@@ -149,7 +123,6 @@ mise run release 2.1.0
 - [ ] Version number follows semver
 - [ ] Run `mise run release:dry-run` to preview
 - [ ] Run `mise run release [version]`
-- [ ] Run `mise run publish`
 - [ ] Verify GitHub release created
 - [ ] Wait for Homebrew tap to auto-update (~1 minute)
 - [ ] Test installation: `brew upgrade deanputney/tap/sound-server`

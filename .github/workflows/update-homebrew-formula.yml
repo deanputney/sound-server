@@ -28,24 +28,11 @@ jobs:
           VERSION="${GITHUB_REF#refs/tags/v}"
           echo "Version: $VERSION"
 
-          # Wait a bit for PyPI to process the release (if using automatic PyPI publishing)
-          echo "Waiting for PyPI to process release..."
-          sleep 30
-
-          # Download and calculate SHA256 of the PyPI tarball
-          TARBALL_URL="https://files.pythonhosted.org/packages/source/s/sound-server/sound-server-${VERSION}.tar.gz"
+          # Download and calculate SHA256 of the GitHub release tarball
+          TARBALL_URL="https://github.com/deanputney/sound-server/archive/refs/tags/v${VERSION}.tar.gz"
           echo "Downloading from: $TARBALL_URL"
 
-          # Retry logic for PyPI (sometimes takes a few minutes to be available)
-          for i in {1..5}; do
-            SHA256=$(curl -Ls "$TARBALL_URL" | shasum -a 256 | cut -d' ' -f1)
-            if [ -n "$SHA256" ] && [ "$SHA256" != "da39a3ee5e6b4b0d3255bfef95601890afd80709" ]; then
-              break
-            fi
-            echo "Attempt $i: PyPI tarball not ready, waiting 30s..."
-            sleep 30
-          done
-
+          SHA256=$(curl -Ls "$TARBALL_URL" | shasum -a 256 | cut -d' ' -f1)
           echo "SHA256: $SHA256"
 
           # Update the formula
@@ -57,8 +44,8 @@ jobs:
           # Replace PLACEHOLDER_SHA256 with actual SHA256
           sed -i "s|sha256 \"PLACEHOLDER_SHA256\"|sha256 \"${SHA256}\"|g" Formula/sound-server.rb
 
-          # Update version if there's a placeholder
-          sed -i "s|PLACEHOLDER_VERSION|${VERSION}|g" Formula/sound-server.rb
+          # Update version in the URL
+          sed -i "s|v2.0.0|v${VERSION}|g" Formula/sound-server.rb
 
       - name: Commit and push to homebrew-tap
         run: |

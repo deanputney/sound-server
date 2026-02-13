@@ -3,7 +3,7 @@ class SoundServer < Formula
 
   desc "HTTP server for playing audio notifications on macOS"
   homepage "https://github.com/deanputney/sound-server"
-  url "https://files.pythonhosted.org/packages/source/s/sound-server/sound-server-2.0.0.tar.gz"
+  url "https://github.com/deanputney/sound-server/archive/refs/tags/v2.0.0.tar.gz"
   sha256 "PLACEHOLDER_SHA256"
   license "MIT"
 

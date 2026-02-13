@@ -107,9 +107,7 @@ $(git log $LAST_TAG..HEAD --pretty=format:'* %s' --no-merges)
 echo ""
 echo "✓ Release $TAG created successfully!"
 echo ""
-echo "Next steps:"
-echo "  1. Publish to PyPI: uv publish"
-echo "  2. GitHub Action will auto-update homebrew tap"
+echo "GitHub Action will auto-update homebrew tap in ~1 minute"
 echo ""
 echo "Release URL: https://github.com/deanputney/sound-server/releases/tag/$TAG"
 '''
@@ -150,8 +148,8 @@ else
 fi
 '''
 
-[tasks.publish]
-description = "Publish to PyPI (run after creating a release)"
+[tasks.build]
+description = "Build the Python package (for testing)"
 run = '''
 #!/bin/bash
 set -e
@@ -160,11 +158,8 @@ echo "Building package..."
 uv build
 
 echo ""
-echo "Publishing to PyPI..."
-uv publish
-
+echo "✓ Package built successfully in dist/"
 echo ""
-echo "✓ Published to PyPI successfully!"
-echo ""
-echo "The homebrew-tap will be updated automatically via GitHub Action."
+echo "To test installation locally:"
+echo "  uv tool install dist/sound_server-*.tar.gz"
 '''
