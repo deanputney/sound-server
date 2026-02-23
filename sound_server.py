@@ -84,7 +84,7 @@ async def list_sounds():
             raise HTTPException(status_code=500, detail="Sounds directory not found")
 
         sounds = [
-            f.name for f in SOUNDS_DIR.iterdir()
+            str(f.relative_to(SOUNDS_DIR)) for f in SOUNDS_DIR.rglob("*")
             if f.is_file() and f.suffix.lower() in ALLOWED_EXTENSIONS
         ]
         sounds.sort()
@@ -103,21 +103,32 @@ async def play_sound(request: PlayRequest):
     sound_name = request.sound
 
     # Security: prevent directory traversal
-    if ".." in sound_name or "/" in sound_name or "\\" in sound_name:
+    if ".." in sound_name or "\\" in sound_name:
         logger.warning(f"Blocked potential directory traversal attempt: {sound_name}")
         raise HTTPException(status_code=400, detail="Invalid sound name")
 
-    # Construct full path
-    sound_path = SOUNDS_DIR / sound_name
+    # Construct full path, allowing subdirectory paths
+    sound_path = (SOUNDS_DIR / sound_name).resolve()
 
-    # Check if file exists
+    # Verify the resolved path is still within SOUNDS_DIR
+    if not str(sound_path).startswith(str(SOUNDS_DIR.resolve())):
+        logger.warning(f"Blocked path escape attempt: {sound_name}")
+        raise HTTPException(status_code=400, detail="Invalid sound name")
+
+    # If exact path not found, search subdirectories by filename
     if not sound_path.exists():
-        logger.warning(f"Sound file not found: {sound_name}")
-        return PlayResponse(
-            status="error",
-            sound=sound_name,
-            message="Sound file not found"
-        )
+        basename = Path(sound_name).name
+        matches = list(SOUNDS_DIR.rglob(basename))
+        if matches:
+            sound_path = matches[0]
+            logger.info(f"Found {basename} at {sound_path.relative_to(SOUNDS_DIR)}")
+        else:
+            logger.warning(f"Sound file not found: {sound_name}")
+            return PlayResponse(
+                status="error",
+                sound=sound_name,
+                message="Sound file not found"
+            )
 
     # Check file extension
     if sound_path.suffix.lower() not in ALLOWED_EXTENSIONS:
