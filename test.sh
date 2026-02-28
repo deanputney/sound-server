@@ -1,7 +1,7 @@
 #!/bin/bash
 # Test script for Sound Server
 
-BASE_URL="http://localhost:9091"
+BASE_URL="http://localhost:48291"
 
 echo "🔍 Testing Sound Server..."
 echo ""
@@ -36,7 +36,7 @@ echo ""
 
 # Test 5: Test from Docker (if running in Docker)
 echo "5️⃣  Testing Docker access (using host.docker.internal):"
-curl -s -X POST "http://host.docker.internal:9091/play" \
+curl -s -X POST "http://host.docker.internal:48291/play" \
   -H 'Content-Type: application/json' \
   -d '{"sound":"you_would_be_glad_to_know.mp3"}' | python3 -m json.tool 2>/dev/null || echo "⚠️  Not accessible (expected if not running in Docker)"
 echo ""

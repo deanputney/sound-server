@@ -1,7 +1,7 @@
 #!/bin/bash
 # Start the Sound Server
 
-echo "Starting Sound Server on port 9091..."
+echo "Starting Sound Server on port 48291..."
 echo "Sounds directory: ~/scripts/sounds/notification_sounds"
 echo ""
 echo "Press Ctrl+C to stop"

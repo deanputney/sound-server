@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Example application that uses Sound Server
+  app:
+    image: python:3.11-slim
+    container_name: sound-client-app
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: python app.py
+    environment:
+      - SOUND_SERVER_URL=http://host.docker.internal:48291
+    # Use host network mode OR add extra_hosts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+
+  # Example worker that sends notifications
+  worker:
+    image: python:3.11-slim
+    container_name: sound-worker
+    volumes:
+      - ./worker:/worker
+    working_dir: /worker
+    command: bash -c "pip install requests && python worker.py"
+    environment:
+      - SOUND_SERVER_URL=http://host.docker.internal:48291
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+    depends_on:
+      - app
+
+networks:
+  app-network:
+    driver: bridge
+
+# Note: Sound Server itself runs on the HOST, not in Docker
+# Start it before running docker-compose:
+#   sound-server
+#
+# Then run this compose file:
+#   docker-compose up
