@@ -8,7 +8,7 @@ A lightweight HTTP server that runs on the host machine to play sound files when
 
 - **Server Location**: Runs on host machine (macOS)
 - **Access**: HTTP endpoint accessible from Docker via `host.docker.internal`
-- **Port**: 9091 (or configurable)
+- **Port**: 48291 (or configurable)
 - **Function**: Receives requests to play sound files and plays them using `afplay`
 
 ## API Design
@@ -136,7 +136,7 @@ Update `~/.claude/settings.json` hooks to use curl instead of afplay:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"strong_minded.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"strong_minded.mp3\"}'"
           }
         ]
       }
@@ -147,7 +147,7 @@ Update `~/.claude/settings.json` hooks to use curl instead of afplay:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"just_saying.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"just_saying.mp3\"}'"
           }
         ]
       }
@@ -158,7 +158,7 @@ Update `~/.claude/settings.json` hooks to use curl instead of afplay:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"you_would_be_glad_to_know.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"you_would_be_glad_to_know.mp3\"}'"
           }
         ]
       }
@@ -173,7 +173,7 @@ Update `~/.claude/settings.json` hooks to use curl instead of afplay:
 ```bash
 cd ~/projects/sound-server
 pip install fastapi uvicorn
-uvicorn server:app --host 0.0.0.0 --port 9091
+uvicorn server:app --host 0.0.0.0 --port 48291
 ```
 
 ### Node.js/Express
@@ -196,18 +196,18 @@ node server.js
 
 ```bash
 # Test health endpoint
-curl http://localhost:9091/health
+curl http://localhost:48291/health
 
 # Test playing a sound
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3"}'
 
 # List available sounds
-curl http://localhost:9091/sounds
+curl http://localhost:48291/sounds
 
 # Test from Docker
-curl -X POST http://host.docker.internal:9091/play \
+curl -X POST http://host.docker.internal:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3"}'
 ```

@@ -8,7 +8,7 @@
 sound-server
 ```
 
-The server will run in the foreground on port 9091.
+The server will run in the foreground on port 48291.
 
 ## Daemon Mode (Run with Command)
 

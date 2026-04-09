@@ -35,7 +35,7 @@ pip3 install -r requirements.txt
 python3 sound_server.py
 ```
 
-The server will start on `http://localhost:9091`
+The server will start on `http://localhost:48291`
 
 ## API Endpoints
 
@@ -43,28 +43,28 @@ The server will start on `http://localhost:9091`
 Check server status
 
 ```bash
-curl http://localhost:9091/health
+curl http://localhost:48291/health
 ```
 
 ### GET /sounds
 List all available sound files
 
 ```bash
-curl http://localhost:9091/sounds
+curl http://localhost:48291/sounds
 ```
 
 ### POST /play
 Play a sound file
 
 ```bash
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3"}'
 ```
 
 With volume control (0.0 to 1.0):
 ```bash
-curl -X POST http://localhost:9091/play \
+curl -X POST http://localhost:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3", "volume":0.5}'
 ```
@@ -72,7 +72,7 @@ curl -X POST http://localhost:9091/play \
 ## Testing from Docker
 
 ```bash
-curl -X POST http://host.docker.internal:9091/play \
+curl -X POST http://host.docker.internal:48291/play \
   -H 'Content-Type: application/json' \
   -d '{"sound":"strong_minded.mp3"}'
 ```
@@ -90,7 +90,7 @@ Add these hooks to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"strong_minded.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"strong_minded.mp3\"}'"
           }
         ]
       }
@@ -101,7 +101,7 @@ Add these hooks to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"just_saying.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"just_saying.mp3\"}'"
           }
         ]
       }
@@ -112,7 +112,7 @@ Add these hooks to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://host.docker.internal:9091/play -H 'Content-Type: application/json' -d '{\"sound\":\"you_would_be_glad_to_know.mp3\"}'"
+            "command": "curl -s -X POST http://host.docker.internal:48291/play -H 'Content-Type: application/json' -d '{\"sound\":\"you_would_be_glad_to_know.mp3\"}'"
           }
         ]
       }
@@ -142,7 +142,7 @@ SOUNDS_DIR = Path.home() / "scripts/sounds/notification_sounds"
 ## Troubleshooting
 
 **Server won't start:**
-- Make sure port 9091 is not already in use
+- Make sure port 48291 is not already in use
 - Check that Python 3.8+ is installed
 
 **Sound won't play:**

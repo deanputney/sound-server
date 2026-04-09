@@ -51,9 +51,9 @@ sound-server --check
 
 ## Architecture
 
-- **Server**: FastAPI-based HTTP server (port 9091)
+- **Server**: FastAPI-based HTTP server (port 48291)
 - **Client**: Claude Code running in Docker
-- **Connection**: `host.docker.internal:9091` from Docker to host
+- **Connection**: `host.docker.internal:48291` from Docker to host
 - **Sound playback**: `afplay` command on macOS
 
 ## Endpoints
