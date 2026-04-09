@@ -176,7 +176,7 @@ async def play_sound(request: PlayRequest):
         )
 
 
-def is_server_running(port=9091, host="localhost"):
+def is_server_running(port=48291, host="localhost"):
     """Check if the sound server is already running"""
     import socket
     try:
@@ -348,7 +348,7 @@ def _daemon_status():
     print(f"Running:    {'yes' if running else 'no'}")
     if pid:
         print(f"PID:        {pid}")
-    print(f"Port:       9091")
+    print(f"Port:       48291")
     print(f"Stdout log: {STDOUT_LOG}")
     print(f"Stderr log: {STDERR_LOG}")
 
@@ -376,13 +376,13 @@ def run_server():
     """Run the sound server"""
     import uvicorn
 
-    logger.info(f"Starting Sound Server on port 9091")
+    logger.info(f"Starting Sound Server on port 48291")
     logger.info(f"Sounds directory: {SOUNDS_DIR}")
 
     uvicorn.run(
         app,
         host="0.0.0.0",  # Listen on all interfaces (needed for Docker access)
-        port=9091,
+        port=48291,
         log_level="info"
     )
 
@@ -522,7 +522,7 @@ Examples:
     # Normal mode: run server in foreground
     else:
         if is_server_running():
-            print("⚠️  Warning: Server may already be running on port 9091")
+            print("⚠️  Warning: Server may already be running on port 48291")
             print("   Use --check to verify, or stop the existing server first")
             print()
 

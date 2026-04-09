@@ -156,8 +156,8 @@ tail -f ~/Library/Logs/sound-server.*.log
 If you get "port already in use" errors:
 
 ```bash
-# Find what's using port 9091
-lsof -i :9091
+# Find what's using port 48291
+lsof -i :48291
 
 # Kill it if needed
 kill <PID>
