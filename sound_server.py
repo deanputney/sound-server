@@ -189,6 +189,189 @@ def is_server_running(port=9091, host="localhost"):
         return False
 
 
+# --- Daemon management ---
+
+LAUNCHAGENT_LABEL = "com.deanputney.soundserver"
+PLIST_FILENAME = f"{LAUNCHAGENT_LABEL}.plist"
+PLIST_DEST = Path.home() / "Library" / "LaunchAgents" / PLIST_FILENAME
+STDOUT_LOG = Path.home() / "Library" / "Logs" / "sound-server.out.log"
+STDERR_LOG = Path.home() / "Library" / "Logs" / "sound-server.err.log"
+
+
+def generate_plist():
+    """Generate the LaunchAgent plist XML dynamically."""
+    import shutil
+
+    binary = shutil.which("sound-server")
+    if not binary:
+        raise RuntimeError(
+            "Could not find 'sound-server' on PATH. "
+            "Is the package installed (pip install -e .)?"
+        )
+
+    home = str(Path.home())
+
+    return f"""\
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>{LAUNCHAGENT_LABEL}</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{binary}</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>{STDOUT_LOG}</string>
+
+    <key>StandardErrorPath</key>
+    <string>{STDERR_LOG}</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>{Path(binary).parent}:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>{home}</string>
+</dict>
+</plist>
+"""
+
+
+def handle_daemon(action):
+    """Handle daemon subcommands: install, uninstall, start, stop, restart, status, logs."""
+    import sys
+
+    if action == "install":
+        _daemon_install()
+    elif action == "uninstall":
+        _daemon_uninstall()
+    elif action == "start":
+        _daemon_start()
+    elif action == "stop":
+        _daemon_stop()
+    elif action == "restart":
+        _daemon_stop()
+        _daemon_start()
+    elif action == "status":
+        _daemon_status()
+    elif action == "logs":
+        _daemon_logs()
+    else:
+        print(f"Unknown daemon action: {action}")
+        print("Valid actions: install, uninstall, start, stop, restart, status, logs")
+        sys.exit(1)
+
+
+def _daemon_install():
+    plist_content = generate_plist()
+    PLIST_DEST.parent.mkdir(parents=True, exist_ok=True)
+    PLIST_DEST.write_text(plist_content)
+    print(f"Installed LaunchAgent plist to {PLIST_DEST}")
+
+
+def _daemon_uninstall():
+    import sys
+
+    if PLIST_DEST.exists():
+        # Unload first if running
+        subprocess.run(
+            ["launchctl", "unload", str(PLIST_DEST)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        PLIST_DEST.unlink()
+        print(f"Removed {PLIST_DEST}")
+    else:
+        print("LaunchAgent plist not found — nothing to uninstall.")
+
+
+def _daemon_start():
+    if not PLIST_DEST.exists():
+        print("Plist not installed yet — installing first...")
+        _daemon_install()
+
+    result = subprocess.run(["launchctl", "load", str(PLIST_DEST)])
+    if result.returncode == 0:
+        print("Sound server daemon started.")
+    else:
+        print("Failed to start daemon (it may already be loaded).")
+
+
+def _daemon_stop():
+    if not PLIST_DEST.exists():
+        print("LaunchAgent plist not installed — nothing to stop.")
+        return
+
+    result = subprocess.run(["launchctl", "unload", str(PLIST_DEST)])
+    if result.returncode == 0:
+        print("Sound server daemon stopped.")
+    else:
+        print("Failed to stop daemon (it may not be running).")
+
+
+def _daemon_status():
+    running = is_server_running()
+
+    # Try to find PID via launchctl
+    pid = None
+    try:
+        result = subprocess.run(
+            ["launchctl", "list"],
+            capture_output=True, text=True,
+        )
+        for line in result.stdout.splitlines():
+            if LAUNCHAGENT_LABEL in line:
+                parts = line.split()
+                if parts[0] != "-":
+                    pid = parts[0]
+                break
+    except Exception:
+        pass
+
+    installed = PLIST_DEST.exists()
+
+    print(f"Installed:  {'yes' if installed else 'no'}")
+    if installed:
+        print(f"Plist:      {PLIST_DEST}")
+    print(f"Running:    {'yes' if running else 'no'}")
+    if pid:
+        print(f"PID:        {pid}")
+    print(f"Port:       9091")
+    print(f"Stdout log: {STDOUT_LOG}")
+    print(f"Stderr log: {STDERR_LOG}")
+
+
+def _daemon_logs():
+    import sys
+
+    logs = []
+    if STDOUT_LOG.exists():
+        logs.append(str(STDOUT_LOG))
+    if STDERR_LOG.exists():
+        logs.append(str(STDERR_LOG))
+
+    if not logs:
+        print("No log files found yet.")
+        sys.exit(1)
+
+    try:
+        subprocess.run(["tail", "-f"] + logs)
+    except KeyboardInterrupt:
+        pass
+
+
 def run_server():
     """Run the sound server"""
     import uvicorn
@@ -224,6 +407,15 @@ Examples:
 
   # Check if server is running
   sound-server --check
+
+  # Daemon management (macOS LaunchAgent)
+  sound-server daemon install     # Install LaunchAgent plist
+  sound-server daemon start       # Start the daemon
+  sound-server daemon stop        # Stop the daemon
+  sound-server daemon restart     # Restart the daemon
+  sound-server daemon status      # Show daemon status
+  sound-server daemon logs        # Tail log files
+  sound-server daemon uninstall   # Remove LaunchAgent plist
         """
     )
     parser.add_argument(
@@ -234,10 +426,18 @@ Examples:
     parser.add_argument(
         'command',
         nargs='*',
-        help='Command to run (server will start in background, run command, then stop)'
+        help='Command to run, or "daemon <action>" for daemon management'
     )
 
     args = parser.parse_args()
+
+    # Daemon subcommand
+    if args.command and args.command[0] == "daemon":
+        if len(args.command) < 2:
+            print("Usage: sound-server daemon <install|uninstall|start|stop|restart|status|logs>")
+            sys.exit(1)
+        handle_daemon(args.command[1])
+        sys.exit(0)
 
     # Check mode
     if args.check:
