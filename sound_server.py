@@ -418,6 +418,17 @@ Examples:
   sound-server daemon uninstall   # Remove LaunchAgent plist
         """
     )
+    try:
+        from importlib.metadata import version as pkg_version
+        ver = pkg_version("sound-server")
+    except Exception:
+        ver = "unknown"
+
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=f'sound-server {ver}',
+    )
     parser.add_argument(
         '--check',
         action='store_true',
